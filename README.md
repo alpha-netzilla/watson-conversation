@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ## Usage
 
-```
+```ruby
 require 'watson/conversation'
 
 manage = Watson::Conversation::ManageDialog.new(
