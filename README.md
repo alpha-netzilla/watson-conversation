@@ -21,6 +21,8 @@ Or install it yourself as:
 ## Usage
 
 ```
+require 'watson/conversation'
+
 manage = Watson::Conversation::ManageDialog.new(
   username: [username],
   password: [password],
