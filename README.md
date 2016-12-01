@@ -30,10 +30,12 @@ manage = Watson::Conversation::ManageDialog.new(
 )
 
 # Get a greet message from a conversation system.
-puts response1 = manage.talk("")
+puts response1 = manage.talk("user1", "")
+#=> "{user: user1, status_code: 200, output: [\"What would you like me to do?\"]}"
 
 # Get a response to a user's input.
-puts response2 = manage.talk("I would like you to ..")
+puts response2 = manage.talk("user1", "I would like you to ...")
+#=> "{user: user1, status_code: 200, output: [\"I help you ...\"]}"
 ```
 
 ## Development

@@ -15,13 +15,13 @@ module Watson
 			end
 		
 		
-			def talk(conversation_id, context, text)
-				if conversation_id == ""
+			def talk(question, context)
+				if context == ""
 					body = {}.to_json
 				else
 					body = {
 						input: {
-							text: text
+							text: question
 						},
 						alternate_intents: true,
 						context: context,
@@ -50,38 +50,29 @@ module Watson
 					workspace_id: workspace_id
 				)
 			
-				@conversation_id = ""
-	
-				@context = {
-					context: {
-						conversation_id: @conversation_id,
-					  dialog_stack: [
-					   "root"
-					  ],
-					  dialog_turn_counter: 1,
-						dialog_request_counter: 1
-					}
-				}
+				@users = {}
 			end
 		
 		
-			def talk(text)
-				code, body = @cnv.talk(@conversation_id, @context, text)
+			def talk(user, question)
+				if @users.key?(user) == false
+					code, response = @cnv.talk("", "")
+				else
+					code, response = @cnv.talk(question, context = @users[user])
+				end
+
 	
 				if code == 200
-					@context = body["context"]
-					@conversation_id = @context["conversation_id"]
+					context = response["context"]
+					@users[user] = context
 	
 					output_texts = Array.new
-					body["output"]["text"].each do | output_text |
+					response["output"]["text"].each do | output_text |
 						output_texts.push(output_text)
 					end
-	
-					return output_texts
-				else
-					return "#{code} #{body}"
 				end
-		
+
+				return "{user: #{user}, status_code: #{code}, output: #{output_texts}}"
 			end
 		end
 		
