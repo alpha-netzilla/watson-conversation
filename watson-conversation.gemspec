@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["alpha.netzilla@gmail.com"]
 
   spec.summary       = %q{Client library to use the IBM Watson Conversation service}
-  spec.description   = %q{you can create an application that understands natural-language input and uses machine learning to respond to customers in a way that simulates a conversation between humans.}
+  spec.description   = %q{Client library to use the IBM Watson Conversation service}
   spec.homepage      = "https://github.com/alpha-netzilla/watson-conversation.git"
   spec.license       = "MIT"
 
