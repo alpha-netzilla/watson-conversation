@@ -1,8 +1,9 @@
 require "watson/conversation/version"
 require 'rest-client'
 require "json"
+require "thread"
 
-	
+
 module Watson
 	module Conversation
 
@@ -13,9 +14,11 @@ module Watson
 				
 				@endpoint = "#{url}/v1/workspaces/#{workspace_id}/message?version=#{version}"
 			end
-		
+
 		
 			def talk(question, context)
+				future_data = FutureData.new()
+
 				if context == ""
 					body = {}.to_json
 				else
@@ -28,22 +31,69 @@ module Watson
 					}.to_json
 				end
 				
-				begin
-					response = RestClient.post @endpoint, body, content_type: :json, accept: :json
-					code = response.code
-					body = JSON.parse(response.body)
-				rescue RestClient::ExceptionWithResponse => e
-					code = e.response.code
-					body = e.response.body
+
+				Thread.start do
+					begin
+						response = RestClient.post @endpoint, body, content_type: :json, accept: :json
+						code = response.code
+						body = JSON.parse(response.body)
+					rescue RestClient::ExceptionWithResponse => e
+						code = e.response.code
+						body = e.response.body
+					end
+					future_data.setRealData(code, body)
 				end
 	
+				return future_data
+			end
+
+
+			def getData()
 				return code, body
 			end
 		end
+
+
+		class FutureData
+			def initialize()
+				@is_ready = false
+				@real_data = nil
+
+				@mutex = Mutex.new
+				@cv = ConditionVariable.new
+			end
+
+
+			def setRealData(code, body)
+				@mutex.synchronize do
+					if (@is_ready == true)
+						return
+					end
+				end
 				
+				@real_data = code, body
+				@is_ready = true
+
+				@cv.broadcast
+			end
+
+
+			def getData()
+				@mutex.synchronize do
+					while (@is_ready == false)
+						@cv.wait(@mutex)
+					end
+				end
+				return @real_data
+			end
+		end
+
 				
+
 		class ManageDialog
 			def initialize(username: "", password: "", workspace_id: "")
+				@mutex = Mutex.new
+
 				@cnv = Dialog.new(
 					username: username,
 					password: password,
@@ -55,24 +105,35 @@ module Watson
 		
 		
 			def talk(user, question)
-				if @users.key?(user) == false
-					code, response = @cnv.talk("", "")
-				else
-					code, response = @cnv.talk(question, context = @users[user])
+				future_data = nil
+				@mutex.synchronize do
+					if @users.key?(user) == false
+						future_data = @cnv.talk("", "")
+					else
+						future_data = @cnv.talk(question, context = @users[user])
+					end
 				end
 
-	
+				code, response = future_data.getData()	
+
+				output_texts = []
 				if code == 200
 					context = response["context"]
-					@users[user] = context
-	
-					output_texts = Array.new
 					response["output"]["text"].each do | output_text |
 						output_texts.push(output_text)
 					end
 				end
 
-				return "{user: #{user}, status_code: #{code}, output: #{output_texts}}"
+
+				@mutex.synchronize do
+					if code == 200
+						@users[user] = context
+					else
+						@users.delete(user)
+					end
+				end
+
+				return {user: user, status_code: code, output: output_texts}.to_json
 			end
 		end
 		
