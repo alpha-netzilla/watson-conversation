@@ -6,16 +6,36 @@ manage = Watson::Conversation::ManageDialog.new(
   workspace_id: [workspace_id]
 )
 
-describe Watson::Conversation do
+
+describe "Version" do
   it "has a version number" do
     expect(Watson::Conversation::VERSION).not_to be nil
   end
+end
 
-	it "is a greet message" do
-		expect(manage.talk("")[0]).to match (/piyo/)
+
+describe "Talk" do
+	let(:user) {"user1"}
+	it "responds a greet message" do
+		expect(manage.talk(user, "")).to match (/piyo/)
 	end
 
-	it "is a response to a user's input" do
-		expect(manage.talk("foo")[0]).to match (/bar/)
+	it "responds to a user's input" do
+		expect(manage.talk(user, "料金案内")).to match (/fuga/)
 	end
 end
+
+
+
+describe "User manage" do
+	let(:user) {"user1"}
+	it "checkes if the the user exists" do
+		expect(manage.has_user?(user)).to match (/#{user} exists/)
+	end
+
+	it "deletes the user" do
+		expect(manage.delete_user(user)).to match (/#{user} was deleted/)
+	end
+end
+
+

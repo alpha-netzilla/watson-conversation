@@ -36,6 +36,14 @@ puts response1 = manage.talk("user1", "")
 # Get a response to a user's input.
 puts response2 = manage.talk("user1", "I would like you to ...")
 #=> "{user: user1, status_code: 200, output: [\"I help you ...\"]}"
+
+# Check if the user exists
+puts manage.has_user?("user1")
+#=> {"code":true, "description":"shinya exists."}
+
+# Delete the user
+puts manage.delete_user("user1")
+{"code":0,"description":"user1 was deleted."}
 ```
 
 ## Development
