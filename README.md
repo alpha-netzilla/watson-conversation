@@ -43,7 +43,7 @@ puts manage.has_user?("user1")
 
 # Delete the user
 puts manage.delete_user("user1")
-{"code":0,"description":"user1 was deleted."}
+#=> {"code":0,"description":"user1 was deleted."}
 ```
 
 ## Development
