@@ -102,6 +102,29 @@ module Watson
 			
 				@users = {}
 			end
+
+
+			def has_user?(user)
+				@mutex.synchronize do
+					if @users.has_key?(user)
+						{code: true, description: "#{user} exists."}.to_json
+					else	
+						{code: false, description: "#{user} does not exists."}.to_json
+					end
+				end
+			end
+
+
+			def delete_user(user)
+				if @users.has_key?(user)
+					@mutex.synchronize do
+						@users.delete(user)
+					end
+					{code: 0, description: "#{user} was deleted."}.to_json
+				else
+					{code: 1, description: "#{user} does not exist."}.to_json
+				end
+			end
 		
 		
 			def talk(user, question)
