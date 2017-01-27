@@ -131,6 +131,7 @@ module Watson
 				@mutex = Mutex.new
 			end
 
+
 			def users
 				@users
 			end
@@ -139,10 +140,12 @@ module Watson
 			def talk(user, question)
 				future_data = nil
 
-				if @users.has_key?(user) == false
-					future_data = @cnv.talk("", "")
-				else
-					future_data = @cnv.talk(question, context = @users.fetch(user))
+				@mutex.synchronize do
+					if @users.has_key?(user) == false
+						future_data = @cnv.talk("", "")
+					else
+						future_data = @cnv.talk(question, context = @users.fetch(user))
+					end
 				end
 
 				code, response = future_data.get_data()	
@@ -155,15 +158,16 @@ module Watson
 					end
 				end
 
-				if code == 200
-					@users.store(user, context)
-				else
-					@users.delete(user)
+				@mutex.synchronize do
+					if code == 200
+						@users.store(user, context)
+					else
+						@users.delete(user)
+					end
 				end
 
 				return {user: user, status_code: code, output: output_texts}.to_json
 			end
 		end
-		
 	end
 end
