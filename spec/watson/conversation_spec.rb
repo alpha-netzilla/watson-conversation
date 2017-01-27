@@ -18,9 +18,9 @@ end
 
 shared_examples_for "conversation" do |storage|
 	manage = Watson::Conversation::ManageDialog.new(
-		username: "2dc1e553-7caf-42a6-9566-7b09563973b6",
-		password: "scXHOmBTv5Po",
-		workspace_id: "7c82e8bd-d234-4dc8-8f49-1771de603f82",
+		username: [username],
+		password: [password],
+		workspace_id: [workspace_id],
 		storage: storage
 	)
 
