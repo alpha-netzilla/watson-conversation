@@ -1,11 +1,5 @@
 require "spec_helper"
-=begin
-manage = Watson::Conversation::ManageDialog.new(
-  username: [username],
-  password: [password],
-  workspace_id: [workspace_id]
-)
-=end
+
 
 
 describe "Version" do
@@ -37,7 +31,7 @@ shared_examples_for "conversation" do |storage|
 	end
 
 
-	describe "has_key?" do
+	describe "#has_key?" do
 		let(:user1) {"user1"}
 		let(:user2) {"user2"}
 		it "checkes if the the user exists" do
@@ -50,7 +44,7 @@ shared_examples_for "conversation" do |storage|
 	end
 
 
-	describe "delete" do
+	describe "#delete" do
 		let(:user1) {"user1"}
 		let(:user2) {"user2"}
 		it "checkes if the the user exists" do
