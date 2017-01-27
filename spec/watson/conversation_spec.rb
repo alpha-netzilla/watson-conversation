@@ -1,10 +1,11 @@
 require "spec_helper"
-
+=begin
 manage = Watson::Conversation::ManageDialog.new(
   username: [username],
   password: [password],
   workspace_id: [workspace_id]
 )
+=end
 
 
 describe "Version" do
@@ -14,28 +15,64 @@ describe "Version" do
 end
 
 
-describe "Talk" do
-	let(:user) {"user1"}
-	it "responds a greet message" do
-		expect(manage.talk(user, "")).to match (/piyo/)
+
+shared_examples_for "conversation" do |storage|
+	manage = Watson::Conversation::ManageDialog.new(
+		username: "2dc1e553-7caf-42a6-9566-7b09563973b6",
+		password: "scXHOmBTv5Po",
+		workspace_id: "7c82e8bd-d234-4dc8-8f49-1771de603f82",
+		storage: storage
+	)
+
+
+	describe "#talk" do
+		let(:user) {"user1"}
+		it "responds a greet message" do
+			expect(manage.talk(user, "")).to match(/status_code/)
+		end
+
+		it "responds to a user's input" do
+			expect(manage.talk(user, "bar")).to match(/status_code/)
+		end
 	end
 
-	it "responds to a user's input" do
-		expect(manage.talk(user, "料金案内")).to match (/fuga/)
+
+	describe "has_key?" do
+		let(:user1) {"user1"}
+		let(:user2) {"user2"}
+		it "checkes if the the user exists" do
+			expect(manage.users.has_key?(user1)).to eq true
+		end
+
+		it "checkes if the the user doesnot exist" do
+			expect(manage.users.has_key?(user2)).to eq false
+		end
+	end
+
+
+	describe "delete" do
+		let(:user1) {"user1"}
+		let(:user2) {"user2"}
+		it "checkes if the the user exists" do
+			expect(manage.users.delete(user1)).to include(a_string_starting_with("conversation")).or eq(1)
+		end
+
+		it "checkes if the the user doesnot exist" do
+			expect(manage.users.delete(user2)).to eq(nil).or eq(0)
+		end
 	end
 end
 
 
 
-describe "User manage" do
-	let(:user) {"user1"}
-	it "checkes if the the user exists" do
-		expect(manage.has_user?(user)).to match (/#{user} exists/)
-	end
-
-	it "deletes the user" do
-		expect(manage.delete_user(user)).to match (/#{user} was deleted/)
-	end
+describe "Hash" do
+	it_behaves_like "conversation", "hash"
 end
+
+
+describe "Redis" do 
+	it_behaves_like "conversation", "redis://127.0.0.1:6379"
+end
+
 
 

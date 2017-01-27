@@ -2,6 +2,8 @@ require "watson/conversation/version"
 require 'rest-client'
 require "json"
 require "thread"
+require "redis"
+
 
 
 module Watson
@@ -11,7 +13,6 @@ module Watson
 			def initialize(username: "", password: "", workspace_id: "")
 				url = "https://#{username}:#{password}@gateway.watsonplatform.net/conversation/api"
 				version="2016-07-11"
-				
 				@endpoint = "#{url}/v1/workspaces/#{workspace_id}/message?version=#{version}"
 			end
 
@@ -30,7 +31,6 @@ module Watson
 						context: context,
 					}.to_json
 				end
-				
 
 				Thread.start do
 					begin
@@ -41,14 +41,14 @@ module Watson
 						code = e.response.code
 						body = e.response.body
 					end
-					future_data.setRealData(code, body)
+					future_data.set_real_data(code, body)
 				end
 	
 				return future_data
 			end
 
 
-			def getData()
+			def get_data()
 				return code, body
 			end
 		end
@@ -64,9 +64,9 @@ module Watson
 			end
 
 
-			def setRealData(code, body)
+			def set_real_data(code, body)
 				@mutex.synchronize do
-					if (@is_ready == true)
+					if @is_ready == true
 						return
 					end
 				end
@@ -78,9 +78,9 @@ module Watson
 			end
 
 
-			def getData()
+			def get_data()
 				@mutex.synchronize do
-					while (@is_ready == false)
+					while @is_ready == false
 						@cv.wait(@mutex)
 					end
 				end
@@ -88,56 +88,64 @@ module Watson
 			end
 		end
 
-				
 
+
+
+		class Redis < ::Redis
+			def fetch(user)
+				JSON.parse(get(user))
+			end
+
+
+			def store(user, data)
+				set(user, data.to_json)
+			end
+
+
+			def delete(user)
+				del(user)
+			end
+
+
+			def has_key?(user)
+				exists(user) 
+			end
+		end
+
+
+	
 		class ManageDialog
-			def initialize(username: "", password: "", workspace_id: "")
-				@mutex = Mutex.new
-
+			def initialize(username: "", password: "", workspace_id: "", storage: "hash")
 				@cnv = Dialog.new(
 					username: username,
 					password: password,
 					workspace_id: workspace_id
 				)
 			
-				@users = {}
-			end
-
-
-			def has_user?(user)
-				@mutex.synchronize do
-					if @users.has_key?(user)
-						{code: true, description: "#{user} exists."}.to_json
-					else	
-						{code: false, description: "#{user} does not exists."}.to_json
-					end
-				end
-			end
-
-
-			def delete_user(user)
-				if @users.has_key?(user)
-					@mutex.synchronize do
-						@users.delete(user)
-					end
-					{code: 0, description: "#{user} was deleted."}.to_json
+				if storage == "hash"
+					@users = Hash.new
 				else
-					{code: 1, description: "#{user} does not exist."}.to_json
+					@users = Redis.new(:url => storage)
 				end
+
+				@mutex = Mutex.new
 			end
-		
-		
+
+			def users
+				@users
+			end
+
+
 			def talk(user, question)
 				future_data = nil
-				@mutex.synchronize do
-					if @users.key?(user) == false
-						future_data = @cnv.talk("", "")
-					else
-						future_data = @cnv.talk(question, context = @users[user])
-					end
+
+				if @users.has_key?(user) == false
+					future_data = @cnv.talk("", "")
+				else
+					future_data = @cnv.talk(question, context = @users.fetch(user))
 				end
 
-				code, response = future_data.getData()	
+				code, response = future_data.get_data()	
 
 				output_texts = []
 				if code == 200
@@ -147,13 +155,10 @@ module Watson
 					end
 				end
 
-
-				@mutex.synchronize do
-					if code == 200
-						@users[user] = context
-					else
-						@users.delete(user)
-					end
+				if code == 200
+					@users.store(user, context)
+				else
+					@users.delete(user)
 				end
 
 				return {user: user, status_code: code, output: output_texts}.to_json
