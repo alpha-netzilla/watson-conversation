@@ -27,7 +27,7 @@ manage = Watson::Conversation::ManageDialog.new(
   username: [username],
   password: [password],
   workspace_id: [workspace_id],
-	# Where to link the freely-selected user name with the conversation_id
+  # Where to link the freely-selected user name with the conversation_id
 	storage: "hash" or "uri for redis like 'redis://127.0.0.1:6379'"
 )
 
