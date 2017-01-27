@@ -132,8 +132,18 @@ module Watson
 			end
 
 
-			def users
+			def users()
 				@users
+			end
+
+
+			def has_key?(user) 
+				@users.has_key?(user)
+			end
+
+
+			def delete(user)
+				@users.delete(user)
 			end
 
 
