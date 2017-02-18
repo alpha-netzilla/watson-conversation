@@ -39,7 +39,7 @@ module Watson
 						body = JSON.parse(response.body)
 					rescue RestClient::ExceptionWithResponse => e
 						code = e.response.code
-						body = e.response.body
+						body = JSON.parse(e.response.body)
 					end
 					future_data.set_real_data(code, body)
 				end
@@ -163,8 +163,12 @@ module Watson
 				output_texts = []
 				if code == 200
 					context = response["context"]
-					response["output"]["text"].each do | output_text |
-						output_texts.push(output_text)
+					response["output"]["text"].each do | text |
+						output_texts.push(text)
+					end
+				else
+					response["error"]["error"]["input.text"].each do | text |
+						output_texts.push(text)
 					end
 				end
 

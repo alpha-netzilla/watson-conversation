@@ -11,21 +11,12 @@ end
 
 
 shared_examples_for "conversation" do |storage|
-=begin
 	manage = Watson::Conversation::ManageDialog.new(
 		username: [username],
 		password: [password],
 		workspace_id: [workspace_id],
 		storage: storage
 	)
-=end
-
-manage = Watson::Conversation::ManageDialog.new(
-  username: "ee8fb293-d7b1-4100-abfd-008f87a56a6c",
-  password: "huGZEefYF6de",
-  workspace_id: "dc660db0-7f25-4cd1-bfb0-c351cf128967"
-)
-  #storage: 'redis://127.0.0.1:6379'
 
 
 	describe "#talk" do
@@ -37,6 +28,7 @@ manage = Watson::Conversation::ManageDialog.new(
 		it "responds to a user's input" do
 			expect(manage.talk(user, "bar")).to match(/status_code/)
 		end
+
 	end
 
 
