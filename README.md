@@ -29,7 +29,7 @@ manage = Watson::Conversation::ManageDialog.new(
   workspace_id: [workspace_id],
   # Where to link the freely-selected user name with the conversation_id
   storage: 'hash'  #means that you use Ruby hash. If you restart the app, the info will be disappeared.
-	# OR
+  # OR
   storage: 'redis://127.0.0.1:6379'"  #means that you use exteranl database like redis(This gem currently supports redis only).
 )
 
