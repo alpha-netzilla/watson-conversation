@@ -12,7 +12,7 @@ module Watson
 		class Dialog			
 			def initialize(username: "", password: "", workspace_id: "")
 				url = "https://#{username}:#{password}@gateway.watsonplatform.net/conversation/api"
-				version="2016-07-11"
+				version="2017-02-03"
 				@endpoint = "#{url}/v1/workspaces/#{workspace_id}/message?version=#{version}"
 			end
 
@@ -167,9 +167,10 @@ module Watson
 						output_texts.push(text)
 					end
 				else
-					response["error"]["error"]["input.text"].each do | text |
-						output_texts.push(text)
-					end
+					#response["error"]["error"]["input.text"].each do | text |
+					#end
+					text = response["error"]
+					output_texts.push(text)
 				end
 
 				@mutex.synchronize do
