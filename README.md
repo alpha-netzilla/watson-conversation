@@ -1,6 +1,10 @@
 # Watson::Conversation
+DEPRICATED
 
-Ruby client library to use the [IBM Watson Conversation][wc] service.
+Watson Conversation has been renamed to Watson Assistant.
+
+I stop this library maintenance, and migrate it to a "Watson Assistant" library.  
+https://github.com/alpha-netzilla/watson-assistant
 
 ## Installation
 
