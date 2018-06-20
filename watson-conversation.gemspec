@@ -27,4 +27,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rest-client", "~> 2.0"
   spec.add_development_dependency "json", "~> 2.0"
   spec.add_development_dependency "redis", "~> 3.3"
+
+  spec.post_install_message = <<-MESSAGE
+   ! The 'watson-conversation' gem has been deprecated and has been replaced by 'watson-assistant'.
+   ! See: https://rubygems.org/gems/watson-assistant
+   ! And: https://github.com/alpha-netzilla/watson-assistant
+  MESSAGE
 end

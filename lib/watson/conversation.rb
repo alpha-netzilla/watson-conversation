@@ -116,6 +116,7 @@ module Watson
 	
 		class ManageDialog
 			def initialize(username: "", password: "", workspace_id: "", storage: "hash")
+        warn "[DEPRECATION] This gem has been renamed to `watson-assistant` and will no longer be supported. Please switch to `watson-assistant` as soon as possible."
 				@cnv = Dialog.new(
 					username: username,
 					password: password,
